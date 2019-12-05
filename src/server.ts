@@ -65,6 +65,6 @@ app.listen(port, () => {
 })
 
 app.on('error', err => {
-  if(!(err instanceof HttpError)) logger.error(`Server error: ${formatError(err)}`)
-  else if((err.status || err.statusCode).toString().startsWith('5')) logger.error(`Server error: ${formatError(err)}`)
+  if(!(err instanceof HttpError)) logger.error('Server error:', err)
+  else if((err.status || err.statusCode).toString().startsWith('5')) logger.error('Server error:', err)
 })

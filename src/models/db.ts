@@ -1,4 +1,4 @@
-import * as Sequelize from 'sequelize'
+import { Sequelize } from 'sequelize'
 const config = require('../../sequelize.config.js')
 
 
