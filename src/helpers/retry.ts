@@ -1,12 +1,14 @@
-export function retry<T>(func: (...args) => Promise<T>, num: number = 5): typeof func {
-  return async function(...args) {
-    for(let i = 0; i < num; i++) {
+export function retry<T>(func: (...args: any[]) => Promise<T>, num: number = 5): typeof func {
+  return async function (...args: any[]) {
+    let lastErr: Error | string | number | null = null
+    for (let i = 0; i < num; i++) {
       try {
         return await func(...args)
-      } catch(err) {
-        if(i == num - 1) throw err
+      } catch (err) {
+        lastErr = err
       }
     }
+    throw lastErr
   }
 }
 

@@ -1,7 +1,4 @@
-import { Context } from 'koa'
-
-
-export async function responseTime(ctx: Context, next: () => Promise<any>) {
+export async function responseTime(ctx: MyAppContext, next: Next) {
   const start = Date.now()
   await next()
   ctx.set('X-Response-Time', `${Date.now() - start}ms`)

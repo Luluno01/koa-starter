@@ -5,6 +5,9 @@ import Store from '../helpers/Store'
 const { cache } = require('../../config.json')
 
 
+/**
+ * @see https://sequelize.org/master/manual/typescript.html
+ */
 export default class User extends Model {
   public id!: number  // Note that the `null assertion` `!` is required in strict mode.
   public name!: string

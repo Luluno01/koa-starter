@@ -1,6 +1,8 @@
 {
   "port": 3000,
-  "maxQueueSize": 5,
+  "cache": {
+    "expire": 3600000
+  },
   "CORS": [
     "http://localhost:3000"
   ]

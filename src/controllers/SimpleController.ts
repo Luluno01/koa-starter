@@ -1,11 +1,7 @@
-import { Context } from 'koa'
-import { Method } from '../global'
-
-
-export class SimpleController {
-  method: Method
-  pattern: string = '/'
-  async handler(ctx: Context, next: () => Promise<any>): Promise<any> { throw new Error('Not implemented') }
+export abstract class SimpleController implements ISimpleController {
+  public abstract method: Method
+  public pattern: string = '/'
+  public abstract async handler(ctx: MyAppContext, next: Next): Promise<any>
 }
 
 export default SimpleController

@@ -1,17 +1,15 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2017",
-    "noImplicitAny": false,
+    "target": "esnext",
+    "noImplicitAny": true,
     "outDir": "build",
     "sourceMap": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "strict": true
   },
   "include": [
     "src/**/*.ts"
   ],
-  "exclude": [
-    "csgo-worker/**/*.ts",
-    "csgo-worker/**/*.d.ts"
-  ]
+  "exclude": []
 }

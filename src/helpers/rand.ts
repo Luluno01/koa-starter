@@ -4,7 +4,7 @@
  * @param b Upper bound.
  */
 export function rand(a: number, b?: number) {
-  if(b == undefined) [ a, b ] = [ 0, a ]
+  if (b == undefined) [ a, b ] = [ 0, a ]
   return Math.floor(Math.random() * (b - a + 1) + a)
 }
 

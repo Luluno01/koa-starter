@@ -12,11 +12,7 @@ import * as fs from 'fs'
 /* Helpers */
 import { formatError } from './helpers/formatError'
 /* Logger */
-import * as _log4js from 'koa-log4'
-import { Logger, Log4js } from 'log4js'
-const log4js: Log4js & {
-  koaLogger(logger: Logger, options: string | Function | object): Koa.Middleware
-} = _log4js
+import * as log4js from 'koa-log4'
 /* Middlewares */
 import installMiddlewares from './middlewares'
 /* Controller */
@@ -24,47 +20,59 @@ import installControllers from './controllers'
 import { HttpError } from 'http-errors'
 
 
-/* Initialize logger */
-const appDir = path.resolve(__dirname, '..')
-const logDir = path.join(appDir, 'logs')
-try {
-  fs.mkdirSync(logDir)
-} catch(err) {
-  if(err.code != 'EEXIST') {
-    console.error(`Could not set up log directory: ${formatError(err)}`)
-    process.exit(1)
+let logger: log4js.Logger | undefined
+
+async function main() {
+  /* Initialize logger */
+  const appDir = path.resolve(__dirname, '..')
+  const logDir = path.join(appDir, 'logs')
+  try {
+    fs.mkdirSync(logDir)
+  } catch(err) {
+    if(err.code != 'EEXIST') {
+      console.error(`Could not set up log directory: ${formatError(err)}`)
+      process.exit(1)
+    }
   }
+  log4js.configure(loggerConfig)
+  logger = log4js.getLogger('app')
+
+  /* Get port */
+  let port: number = parseInt(process.env.PORT!) || config.port
+
+  /* Initialize application */
+  const app = new Koa<Koa.DefaultState, MyAppContext>()
+  const router = new Router
+  app.context.config = config
+  router.use(log4js.koaLogger(log4js.getLogger('http'), { level: 'auto' }))
+
+  /* Add logger */
+  app.context.logger = logger
+
+  /* Load middlewares */
+  installMiddlewares(app, router)
+
+  /* Install controllers */
+  installControllers(router)
+
+  app.use(router.routes())
+
+
+  /* Start server */
+  app.listen(port, () => {
+    logger!.info(`Server running on port ${port}`)
+  })
+
+  app.on('error', err => {
+    if (
+      !(err instanceof HttpError) ||
+      (err.status || err.statusCode).toString().startsWith('5')
+    ) logger!.error('Server error:', err)
+  })
 }
-log4js.configure(loggerConfig)
-const logger = log4js.getLogger('app')
 
-/* Get port */
-let port: number = parseInt(process.env.PORT) || config.port
-
-/* Initialize application */
-const app = new Koa
-const router = new Router
-app.context.config = config
-router.use(log4js.koaLogger(log4js.getLogger('http'), { level: 'auto' }))
-
-/* Add logger */
-app.context.logger = logger
-
-/* Load middlewares */
-installMiddlewares(app, router)
-
-/* Install controllers */
-installControllers(router)
-
-app.use(router.routes())
-
-
-/* Start server */
-app.listen(port, () => {
-  logger.info(`Server running on port ${port}`)
-})
-
-app.on('error', err => {
-  if(!(err instanceof HttpError)) logger.error('Server error:', err)
-  else if((err.status || err.statusCode).toString().startsWith('5')) logger.error('Server error:', err)
-})
+main()
+  .catch(err => {
+    (logger?.error || console.log)('Failed to start server', err)
+    process.exit(1)
+  })

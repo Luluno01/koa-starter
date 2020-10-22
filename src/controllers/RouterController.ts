@@ -1,9 +1,9 @@
 import * as Router from 'koa-router'
 
 
-export class RouterController {
-  pattern: string = '/'
-  router: Router
+export abstract class RouterController implements IRouterController {
+  public pattern: string = '/'
+  public abstract router: Router
 }
 
 export default RouterController

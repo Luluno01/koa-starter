@@ -1,12 +1,10 @@
 import SimpleController from './SimpleController'
-import { Method } from '../global'
-import { Context } from 'koa'
 
 
 export default class Home extends SimpleController {
-  method: Method = 'get'
-  pattern: string = '/'
-  async handler(ctx: Context) {
+  public method: Method = 'get'
+  public pattern: string = '/'
+  async handler(ctx: MyAppContext) {
     ctx.body = 'Hello World!'
   }
 }
