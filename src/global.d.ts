@@ -25,7 +25,7 @@ interface IStore {
    * Set a value identified by a key, optionally set its TTL
    * @param key Key of the value to set
    * @param value Formattable value or JSON object
-   * @param expire Optional, expiration duration in milliseconds
+   * @param expire Optional, expiration duration in seconds
    */
   set(key: string, value: Formattable | object, expire?: number): Promise<'OK'>
 
@@ -45,14 +45,14 @@ interface IStore {
    * @param key Key of the value to set
    * @param value Lazy value retriever
    * @param force Ignore cache and update the value
-   * @param expire Optional, expiration duration in milliseconds
+   * @param expire Optional, expiration duration in seconds
    */
   getAndSet(key: string, value: () => Promise<Formattable | object>, force?: boolean, expire?: number): Promise<string | Formattable | object | null>
 }
 
 type Logger = import('log4js').Logger
 
-type DefaultContext = import('koa').DefaultContext
+type DefaultContext = import('koa').Context
 
 interface MyAppContext extends DefaultContext {
   config: Config
