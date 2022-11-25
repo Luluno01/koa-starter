@@ -9,16 +9,30 @@
       "pattern": "app-yyyy-MM-dd.log",
       "alwaysIncludePattern": true
     },
+    "app.json": {
+      "type": "dateFile",
+      "layout": { "type": "json" },
+      "filename": "logs/app/",
+      "pattern": "app-yyyy-MM-dd.json.log",
+      "alwaysIncludePattern": true
+    },
     "http": {
       "type": "dateFile",
       "filename": "logs/http/",
       "pattern": "http-yyyy-MM-dd.log",
       "alwaysIncludePattern": true
+    },
+    "http.json": {
+      "type": "dateFile",
+      "layout": { "type": "json" },
+      "filename": "logs/http/",
+      "pattern": "http-yyyy-MM-dd.json.log",
+      "alwaysIncludePattern": true
     }
   },
   "categories": {
     "default": { "appenders": [ "console" ], "level": "debug" },
-    "app": { "appenders": [ "console", "app" ], "level": "debug" },
-    "http": { "appenders": [ "console", "http" ], "level": "debug" }
+    "app": { "appenders": [ "console", "app", "app.json" ], "level": "debug" },
+    "http": { "appenders": [ "console", "http", "http.json" ], "level": "debug" }
   }
 }
