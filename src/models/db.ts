@@ -1,6 +1,6 @@
-import { readFileSync } from 'fs'
+import path from 'path'
 import { Sequelize } from 'sequelize'
-const config = JSON.parse(readFileSync('sequelize.config.js').toString())
+const config = require(path.resolve('sequelize.config.js'))
 
 
 export const sequelize = new Sequelize(process.env.DB_URL!, config)
