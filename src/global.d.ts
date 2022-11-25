@@ -4,10 +4,6 @@ interface Config {
   CORS?: string[]
 }
 
-interface Formattable {
-  toJSON(): object
-}
-
 interface IStore {
   /**
    * Retrieve a string value identified by a key, return null if not found
@@ -27,18 +23,18 @@ interface IStore {
    * @param value Formattable value or JSON object
    * @param expire Optional, expiration duration in seconds
    */
-  set(key: string, value: Formattable | object, expire?: number): Promise<'OK'>
+  set(key: string, value: object, expire?: number): Promise<'OK'>
 
   /**
    * Delete a value identified by a key
-   * @param key Key to be deleted
+   * @param keys Keys to be deleted
    */
-  del(key: string): Promise<0 | 1>
+  del(...keys: string[]): Promise<number>
 
   /**
    * Flush database
    */
-  flushdb(): Promise<'OK'>
+  flushDb(): Promise<'OK'>
 
   /**
    * Retrieve the value if it is not found in the store and update the cache, or return the cached value without retrieving it again
@@ -47,7 +43,7 @@ interface IStore {
    * @param force Ignore cache and update the value
    * @param expire Optional, expiration duration in seconds
    */
-  getAndSet(key: string, value: () => Promise<Formattable | object>, force?: boolean, expire?: number): Promise<string | Formattable | object | null>
+  getAndSet(key: string, value: () => Promise<object>, force?: boolean, expire?: number): Promise<string | object | null>
 }
 
 type Logger = import('log4js').Logger
@@ -65,7 +61,7 @@ type App = import('koa')<import('koa').DefaultState, MyAppContext>
 type Next = import('koa').Next
 
 type Method = 'get' | 'post' | 'patch' | 'put' | 'del' | 'all'
-type Router = import('koa-router')<import('koa').DefaultState, MyAppContext>
+type Router = import('@koa/router')<import('koa').DefaultState, MyAppContext>
 interface ISimpleController {
   method: Method
   pattern: string

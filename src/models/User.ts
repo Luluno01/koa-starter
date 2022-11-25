@@ -17,7 +17,7 @@ export default class User extends Model {
   public readonly createdAt!: Date
   public readonly updatedAt!: Date
 
-  public static associations: {}
+  public static override associations: {}
 }
 
 User.init({

@@ -1,18 +1,15 @@
 /* Koa */
-import * as Koa from 'koa'
-import * as Router from "koa-router"
-/* Config */
-// import * as config from '../config.json'
-// import * as loggerConfig from '../log4js.json'
-const config = require('../config.json')
-const loggerConfig = require('../log4js.json')
+import Koa from 'koa'
+import Router from '@koa/router'
 /* Standard node lib */
-import * as path from 'path'
-import * as fs from 'fs'
+import fs from 'fs'
+/* Config */
+const config = JSON.parse(fs.readFileSync('config.json').toString())
+const loggerConfig = JSON.parse(fs.readFileSync('log4js.json').toString())
 /* Helpers */
 import { formatError } from './helpers/formatError'
 /* Logger */
-import * as log4js from 'koa-log4'
+import log4js from 'koa-log4'
 /* Middlewares */
 import installMiddlewares from './middlewares'
 /* Controller */
@@ -24,8 +21,7 @@ let logger: log4js.Logger | undefined
 
 async function main() {
   /* Initialize logger */
-  const appDir = path.resolve(__dirname, '..')
-  const logDir = path.join(appDir, 'logs')
+  const logDir = 'logs'  // Under current working directory
   try {
     fs.mkdirSync(logDir)
   } catch(err) {
@@ -34,15 +30,16 @@ async function main() {
       process.exit(1)
     }
   }
+  log4js.addLayout('json', config => logEvent => JSON.stringify(logEvent) + (config.separator ?? ''))
   log4js.configure(loggerConfig)
   logger = log4js.getLogger('app')
 
   /* Get port */
-  let port: number = parseInt(process.env.PORT!) || config.port
+  const port: number = parseInt(process.env.PORT!) || config.port
 
   /* Initialize application */
   const app = new Koa<Koa.DefaultState, MyAppContext>()
-  const router = new Router
+  const router = new Router<Koa.DefaultState, MyAppContext>()
   app.context.config = config
   router.use(log4js.koaLogger(log4js.getLogger('http'), { level: 'auto' }))
 
@@ -50,12 +47,14 @@ async function main() {
   app.context.logger = logger
 
   /* Load middlewares */
-  installMiddlewares(app, router)
+  await installMiddlewares(app, router)
 
   /* Install controllers */
   installControllers(router)
 
-  app.use(router.routes())
+  app
+    .use(router.routes())
+    .use(router.allowedMethods())
 
 
   /* Start server */

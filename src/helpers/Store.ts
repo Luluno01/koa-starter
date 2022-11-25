@@ -1,78 +1,69 @@
-import * as redis from 'redis'
-import { promisify } from 'util'
+import { createClient } from 'redis'
 
 
-export function createClient(url: string = process.env.RD_URL!): Promise<redis.RedisClient> {
-  const client = redis.createClient(url)
-  return new Promise((resolve, reject) => {
-    client
-      .on('error', err => reject(err))
-      .on('connect', () => resolve(client))
-  })
-}
-
-function stringify(value: Formattable | object) {
-  if (typeof (value as any).toJSON == 'function') {
-    return JSON.stringify((value as Formattable).toJSON())
-  } else {
-    return JSON.stringify(value)
-  }
-}
+export type RedisClientOptions = Parameters<typeof createClient>[0]
+export type RedisClient = ReturnType<typeof createClient>
 
 export class Store implements IStore {
-  public client!: redis.RedisClient
-  public url: string
-  private _get!: (key: string) => Promise<string | null>
-  private _set!: (key: string, value: string, mode?: string, duration?: number) => Promise<'OK'>
-  private _del!: (key: string) => Promise<0 | 1>
-  private _flushdb!: () => Promise<'OK'>
+  public client!: RedisClient
+  public options?: RedisClientOptions
 
-  constructor(url: string = process.env.RD_URL!) {
-    this.url = url
+  constructor(options?: RedisClientOptions) {
+    this.options = options
   }
 
-  async init() {
+  /**
+   * Init the Redis client, connect to the server and ping
+   * @returns 
+   */
+  public async init() {
     if (this.client) return this
-    const client = this.client = await createClient(this.url)
-    this._get = promisify(client.get).bind(client)
-    this._set = promisify(client.set).bind(client) as (key: string, value: string, mode?: string, duration?: number) => Promise<'OK'>
-    this._del = promisify(client.del as redis.OverloadedCommand<string, 0 | 1, boolean>).bind(client)
-    this._flushdb = promisify<'OK'>(client.flushdb).bind(client)
+    const client = this.client = createClient(this.options)
+    await client.connect()
+    await client.ping()
     return this
   }
   
-  async get(key: string) {
-    return await this._get(key)
+  public async get(key: string) {
+    return this.client.get(key)
   }
 
-  async getParsed<T = any>(key: string): Promise<T | null> {
-    let res = await this._get(key)
+  public async getParsed<T = any>(key: string): Promise<T | null> {
+    const res = await this.get(key)
     return res ? JSON.parse(res) : null
   }
 
-  async set(key: string, value: Formattable | object, expire: number = 0) {
-    if (expire) return await this._set(key, stringify(value), 'EX', expire)
-    else return await this._set(key, stringify(value))
+  public async set(key: string, value: object | null, expire: number = 0) {
+    if (expire) {
+      return this.client.set(key, JSON.stringify(value), { EX: expire }) as Promise<'OK'>
+    } else {
+      return this.client.set(key, JSON.stringify(value)) as Promise<'OK'>
+    }
   }
 
-  async del(key: string) {
-    return await this._del(key)
+  public async del(...keys: string[]) {
+    return this.client.del(keys)
   }
 
-  async flushdb() {
-    return await this._flushdb()
+  public async flushDb() {
+    return this.client.flushDb() as Promise<'OK'>
   }
 
-  async getAndSet(key: string, value: () => Promise<Formattable | object>, force: boolean = false, expire: number = 0) {
+  public async getAndSet(
+    key: string,
+    value: () => Promise<object>,
+    force: boolean = false,
+    expire: number = 0
+  ) {
     if (force) {
       const val = await value()
       if (val != null) await this.set(key, val, expire)
       return val
     } else {
-      let val: string | Formattable | object | null = await this.get(key)
-      if (val == null) {
+      let val: string | object | null = await this.get(key)
+      if (val === null) {
         val = await value()
-        if (val != null) await this.set(key, val, expire)
+        if (val !== null) await this.set(key, val, expire)
       }
       return val
     }

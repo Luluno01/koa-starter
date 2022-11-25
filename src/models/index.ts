@@ -12,7 +12,7 @@ export const models: { [key: string]: { default: typeof Model, sync: () => Promi
 export default models
 
 export async function sync() {
-  if (cache) await (await (new Store).init()).flushdb()
+  if (cache) await (await (new Store).init()).flushDb()
   await sequelize.sync({ force: true })
   for (const modelName in models) {
     try {
