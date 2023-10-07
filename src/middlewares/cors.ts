@@ -1,10 +1,10 @@
-import * as log4js from 'koa-log4'
+import log4js from 'log4js'
 
 
 let CORS: string[] | null
 
 export async function init(app: App, _: Router) {
-  CORS = app.context.config.CORS || null
+  CORS = app.context.config.CORS ?? null
   if (CORS) {
     log4js.getLogger('app').info(`Cross-origin allowed origin(s): ${CORS.join(', ')}`)
   }
@@ -15,7 +15,7 @@ export async function cors(ctx: MyAppContext, next: Next) {
   try { 
     await next()
   } catch(err) {
-    if (CORS && CORS.includes(origin)) {
+    if (CORS?.includes(origin)) {
       ctx.logger.info(`Cross-origin request from origin "${origin}"`)
       err.headers = err.headers || {}
       err.headers['Access-Control-Allow-Credentials'] = true
@@ -23,7 +23,7 @@ export async function cors(ctx: MyAppContext, next: Next) {
     } 
     throw err
   } 
-  if (CORS && CORS.includes(origin)) {
+  if (CORS?.includes(origin)) {
     ctx.logger.info(`Cross-origin request from origin "${origin}"`)
     ctx.set('Access-Control-Allow-Credentials', 'true')
     ctx.set('Access-Control-Allow-Origin', origin)

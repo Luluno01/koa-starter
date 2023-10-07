@@ -1,5 +1,5 @@
 import Store from '../helpers/Store'
-import * as log4js from 'koa-log4'
+import log4js from 'log4js'
 
 
 export async function init(app: App, _: Router) {

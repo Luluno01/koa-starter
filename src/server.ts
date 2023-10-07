@@ -4,12 +4,13 @@ import Router from '@koa/router'
 /* Standard node lib */
 import fs from 'fs'
 /* Config */
-const config = JSON.parse(fs.readFileSync('config.json').toString())
+const config = JSON.parse(fs.readFileSync('config.json').toString()) as Config
 const loggerConfig = JSON.parse(fs.readFileSync('log4js.json').toString())
 /* Helpers */
 import { formatError } from './helpers/formatError'
 /* Logger */
-import log4js from 'koa-log4'
+import log4js from 'log4js'
+import { koaLogger, Logger as _Logger } from 'koa-log4'
 /* Middlewares */
 import installMiddlewares from './middlewares'
 /* Controller */
@@ -41,7 +42,7 @@ async function main() {
   const app = new Koa<Koa.DefaultState, MyAppContext>()
   const router = new Router<Koa.DefaultState, MyAppContext>()
   app.context.config = config
-  router.use(log4js.koaLogger(log4js.getLogger('http'), { level: 'auto' }))
+  router.use(koaLogger(log4js.getLogger('http') as unknown as _Logger, { level: 'auto' }))
 
   /* Add logger */
   app.context.logger = logger
@@ -72,6 +73,6 @@ async function main() {
 
 main()
   .catch(err => {
-    (logger?.error || console.log)('Failed to start server', err)
+    (logger?.error.bind(logger) ?? console.log)('Failed to start server', err)
     process.exit(1)
   })

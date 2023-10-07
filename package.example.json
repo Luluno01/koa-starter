@@ -17,22 +17,23 @@
   "author": "Untitled",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^2.0.20",
-    "ts-node": "^10.9.1"
+    "@types/koa": "^2.13.9",
+    "@types/koa__router": "^12.0.1",
+    "@types/node": "^20.8.3",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "@koa/router": "^12.0.0",
-    "@types/koa": "^2.13.5",
-    "@types/koa__router": "^12.0.0",
     "@types/koa-log4": "^2.3.3",
-    "@types/node": "^18.11.9",
     "@types/validator": "^13.7.10",
-    "koa": "^2.11.0",
+    "koa": "^2.14.2",
     "koa-log4": "^2.3.2",
-    "pg": "^8.0.0",
-    "pg-hstore": "^2.3.3",
-    "redis": "^4.5.1",
-    "sequelize": "^6.3.5",
-    "typescript": "^4.9.3"
+    "log4js": "^6.9.1",
+    "pg": "^8.11.3",
+    "pg-hstore": "^2.3.4",
+    "redis": "^4.6.10",
+    "sequelize": "^6.33.0"
   }
 }
