@@ -64,15 +64,15 @@ async function main() {
   })
 
   app.on('error', err => {
-    if (
-      !(err instanceof HttpError) ||
-      (err.status || err.statusCode).toString().startsWith('5')
-    ) logger!.error('Server error:', err)
+    const status = (err as HttpError)?.status ?? (err as HttpError)?.statusCode
+    if (typeof status !== 'number' || status.toString().startsWith('5')) {
+      logger!.error('Server error:', err)
+    }
   })
 }
 
 main()
   .catch(err => {
-    (logger?.error.bind(logger) ?? console.log)('Failed to start server', err)
+    (logger ?? console).error('Failed to start server', err)
     process.exit(1)
   })
